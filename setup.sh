@@ -29,3 +29,12 @@ if [ -d "$PROJECT_DIR" ] && [ "$(ls -A "$PROJECT_DIR")" ]; then
   fi
 fi
 
+
+# Step 2: Create Next.js App using pnpm
+echo -e "${GREEN}🚧 Creating Next.js app in '${PROJECT_DIR}' using pnpm...${NC}"
+pnpm dlx create-next-app@latest "$PROJECT_DIR"
+
+cd "$PROJECT_DIR" || exit
+echo -e "${GREEN}✅ Entered project directory: $PROJECT_DIR${NC}"
+
+
