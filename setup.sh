@@ -199,3 +199,75 @@ EOL
         echo -e "${YELLOW}⚠️ Skipping seeding setup${NC}"
     fi
 fi
+
+
+# Step 5: Better-Auth Setup
+echo -e "\n${CYAN}🔐 Better-Auth Configuration${NC}"
+
+if [[ $DB_CHOICE =~ ^[12]$ ]]; then
+    read -p "$(echo -e ${YELLOW}Enable Better-Auth? [y/N] '>' ${NC})" AUTH_CHOICE
+    
+    if [[ "$AUTH_CHOICE" =~ ^[Yy]$ ]]; then
+        echo -e "${GREEN}🛡️ Configuring Better-Auth...${NC}"
+        
+        # Install core packages
+        pnpm add better-auth
+        
+        # Env configuration
+        echo -e "\n# Better-Auth" >> .env
+        echo "BETTER_AUTH_SECRET=$(openssl rand -hex 32)" >> .env
+        echo "BETTER_AUTH_URL=http://localhost:3000" >> .env
+        
+        # Create auth directory
+        AUTH_DIR=$([ -d "src" ] && echo "src/lib" || echo "lib")
+        
+        # Config file based on DB adapter
+        case $DB_CHOICE in
+            1)
+                # ===== PRISMA CONFIG =====
+            cat > $AUTH_DIR/auth.ts << 'EOL'
+import { betterAuth } from "better-auth";
+import { prismaAdapter } from "better-auth/adapters/prisma";
+import { PrismaClient } from "../../prisma/generated";
+
+const prisma = new PrismaClient();
+export const auth = betterAuth({
+    database: prismaAdapter(prisma, {
+        provider: "sqlite", // or "mysql", "postgresql", ...etc
+    }),
+});
+EOL
+                # Create Database Tables
+                pnpm dlx @better-auth/cli generate
+                
+                # Add mount handler
+                mkdir -p "src/app/api/auth/[...all]"
+        cat > "src/app/api/auth/[...all]/route.ts" << 'EOL'
+import { auth } from "@/lib/auth";
+import { toNextJsHandler } from "better-auth/next-js";
+
+export const { POST, GET } = toNextJsHandler(auth);
+EOL
+                
+                # Create client instance
+        cat > $AUTH_DIR/auth-client.ts << 'EOL'
+import { auth } from "@/lib/auth";
+import { toNextJsHandler } from "better-auth/next-js";
+
+export const { POST, GET } = toNextJsHandler(auth);
+EOL
+            ;;
+        esac
+        
+        # Add CLI script
+        pnpm pkg set scripts.auth:gen="pnpm dlx @better-auth/cli generate"
+        
+        echo -e "${GREEN}✅ Better-Auth configured!${NC}"
+        echo "Run: pnpm auth:gen to generate types"
+        
+    else
+        echo -e "${YELLOW}⚠️ Skipping authentication setup${NC}"
+    fi
+fi
+
+echo -e "${GREEN}\n\n🎉 That's it. Your project is ready! 🚀🚀🚀${NC}"
