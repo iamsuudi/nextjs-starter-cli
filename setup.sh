@@ -38,3 +38,22 @@ cd "$PROJECT_DIR" || exit
 echo -e "${GREEN}✅ Entered project directory: $PROJECT_DIR${NC}"
 
 
+# Step 3: Choose Database Adapter
+echo -e "${YELLOW}Choose a database adapter > ${NC}"
+select DB_ADAPTER in "prisma"; do
+    case $DB_ADAPTER in
+        prisma)
+            echo -e "${GREEN}✔ Selected database adapter: Prisma${NC}"
+            echo -e "${GREEN}📦 Installing Prisma dependencies...${NC}"
+            pnpm add -D prisma && pnpm add @prisma/client
+            
+            echo -e "${GREEN}⚙️ Initializing Prisma...${NC}"
+            pnpm dlx prisma init
+            break
+        ;;
+        * )
+            echo -e "${YELLOW}Invalid selection. Please choose a valid adapter.${NC}"
+        ;;
+    esac
+done
+
