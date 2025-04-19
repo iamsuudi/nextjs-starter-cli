@@ -166,12 +166,15 @@ fi
 
 
 
+# Create @lib directory if not found
+mkdir -p "src/lib"
+
+
+
+
 # Step 4: Database Client Setup
 echo -e "\n${CYAN}🚀 Database Client Configuration${NC}"
 
-# Determine project structure (src or no src)
-CLIENT_BASE_DIR=$([ -d "src" ] && echo "src/lib" || echo "lib")
-mkdir -p "$CLIENT_BASE_DIR"
 
 while true; do
     echo -e "\n${CYAN}📊 Database Adapter Selection:${NC}"
@@ -190,13 +193,13 @@ while true; do
             pnpm add -D prisma
             
             # Initialize Prisma
-            pnpm dlx prisma init \--datasource-provider sqlite \--output ../src/app/generated/prisma
+            pnpm dlx prisma init \--datasource-provider sqlite \--output ../src/generated/prisma
             
             # Add Example model to schema
             cat > prisma/schema.prisma << 'EOL'
 generator client {
   provider = "prisma-client-js"
-  output = "./generated"
+  output = "../src/generated/prisma"
 }
 
 datasource db {
@@ -219,8 +222,8 @@ EOL
             echo -e "${GREEN}✅ Prisma initialized!${NC}"
             
             # Create optimized client
-            cat > "$CLIENT_BASE_DIR/prisma.ts" << 'EOL'
-import { PrismaClient } from '../../prisma/generated';
+            cat > "src/lib/prisma.ts" << 'EOL'
+import { PrismaClient } from '../generated/prisma';
 
 const globalForPrisma = global as unknown as {
     prisma: PrismaClient
@@ -236,6 +239,11 @@ EOL
             # Generate Prisma Client
             echo -e "${GREEN}⚙️ Generating Prisma Client...${NC}"
             pnpm dlx prisma generate
+            
+            # Env configuration
+            echo -e "\n\n# Generated Prisma Client" >> .gitignore
+            echo -e "src/generated" >> .gitignore
+            
             echo -e "${GREEN}✅ Prisma (SQLite) ready!${NC}"
             break
         ;;
@@ -247,7 +255,7 @@ EOL
             pnpm add -D drizzle-kit
             
             # Create client file
-            cat > "$CLIENT_BASE_DIR/drizzle.ts" << 'EOL'
+            cat > "src/lib/drizzle.ts" << 'EOL'
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import Database from 'better-sqlite3';
 
@@ -298,7 +306,7 @@ if [[ $DB_CHOICE =~ ^[12]$ ]]; then
             1)
                 # ===== PRISMA SEEDING =====
                 cat > prisma/seed.ts << 'EOL'
-import { PrismaClient } from './generated';
+import { PrismaClient } from '../src/generated/prisma';
 
 const prisma = new PrismaClient();
 
@@ -342,21 +350,18 @@ if [[ $DB_CHOICE =~ ^[12]$ ]]; then
         pnpm add better-auth
         
         # Env configuration
-        echo -e "\n# Better-Auth" >> .env
+        echo -e "\n\n# Better-Auth" >> .env
         echo "BETTER_AUTH_SECRET=$(openssl rand -hex 32)" >> .env
         echo "BETTER_AUTH_URL=http://localhost:3000" >> .env
-        
-        # Create auth directory
-        AUTH_DIR=$([ -d "src" ] && echo "src/lib" || echo "lib")
         
         # Config file based on DB adapter
         case $DB_CHOICE in
             1)
                 # ===== PRISMA CONFIG =====
-            cat > $AUTH_DIR/auth.ts << 'EOL'
+            cat > "src/lib/auth.ts" << 'EOL'
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { PrismaClient } from "../../prisma/generated";
+import { PrismaClient } from "../generated/prisma";
 
 const prisma = new PrismaClient();
 export const auth = betterAuth({
@@ -378,7 +383,7 @@ export const { POST, GET } = toNextJsHandler(auth);
 EOL
                 
                 # Create client instance
-        cat > $AUTH_DIR/auth-client.ts << 'EOL'
+        cat > "src/lib/auth-client.ts" << 'EOL'
 import { auth } from "@/lib/auth";
 import { toNextJsHandler } from "better-auth/next-js";
 
@@ -391,7 +396,7 @@ EOL
         pnpm pkg set scripts.auth:gen="pnpm dlx @better-auth/cli generate"
         
         echo -e "${GREEN}✅ Better-Auth configured!${NC}"
-        echo "Run: pnpm auth:gen to generate types"
+        echo "Run: pnpm auth:gen to generate auth types"
         
     else
         echo -e "${YELLOW}⚠️ Skipping authentication setup${NC}"
