@@ -241,7 +241,7 @@ echo -e "\n${CYAN}🔐 Better-Auth Configuration${NC}"
 # Remote file URLs (replace with your actual raw GitHub URLs)
 AUTH_PRISMA_CONFIG_URL="https://raw.githubusercontent.com/iamsuudi/nextjs-starter-cli/main/src/lib/auth-prisma.ts"
 AUTH_DRIZZLE_CONFIG_URL="https://raw.githubusercontent.com/iamsuudi/nextjs-starter-cli/main/src/lib/auth-drizzle.ts"
-AUTH_ROUTE_URL="https://raw.githubusercontent.com/iamsuudi/nextjs-starter-cli/main/src/app/api/[...all]/route.ts"
+AUTH_ROUTE_URL="https://raw.githubusercontent.com/iamsuudi/nextjs-starter-cli/main/src/app/api/route.ts"
 AUTH_CLIENT_URL="https://raw.githubusercontent.com/iamsuudi/nextjs-starter-cli/main/src/lib/auth-client.ts"
 
 if [[ $DB_CHOICE =~ ^[12]$ ]]; then
