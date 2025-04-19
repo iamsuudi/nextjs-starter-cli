@@ -223,7 +223,6 @@ if [[ $DB_CHOICE =~ ^[12]$ ]]; then
                 pnpm pkg set scripts.seed="pnpm dlx tsx drizzle/seed.ts"
                 echo -e "${GREEN}✅ Drizzle seeding configured!${NC}"
             ;;
-        ;;
         esac
     else
         echo -e "${YELLOW}⚠️ Skipping seeding setup${NC}"
@@ -297,7 +296,6 @@ if [[ $DB_CHOICE =~ ^[12]$ ]]; then
                 echo -e "${GREEN}✅ Better-Auth configured!${NC}"
                 echo "Run: pnpm auth:gen to generate auth types"
             ;;
-        ;;
         esac
     else
         echo -e "${YELLOW}⚠️ Skipping authentication setup${NC}"
