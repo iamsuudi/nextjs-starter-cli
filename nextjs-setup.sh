@@ -213,6 +213,7 @@ if [[ $DB_CHOICE =~ ^[12]$ ]]; then
                 pnpm pkg set scripts.seed="pnpm dlx tsx prisma/seed.ts"
                 echo -e "${GREEN}✅ Prisma seed script created!${NC}"
                 echo -e "${YELLOW}Run with: pnpm seed${NC}"
+                break
             ;;
             2)
                 # ===== DRIZZLE SEEDING =====
@@ -222,6 +223,7 @@ if [[ $DB_CHOICE =~ ^[12]$ ]]; then
                 
                 pnpm pkg set scripts.seed="pnpm dlx tsx drizzle/seed.ts"
                 echo -e "${GREEN}✅ Drizzle seeding configured!${NC}"
+                break
             ;;
         ;;
         esac
@@ -278,6 +280,7 @@ if [[ $DB_CHOICE =~ ^[12]$ ]]; then
                 
                 echo -e "${GREEN}✅ Better-Auth configured!${NC}"
                 echo "Run: pnpm auth:gen to generate auth types"
+                break
             ;;
             2)
                 # ===== DRIZZLE CONFIG =====
@@ -296,6 +299,7 @@ if [[ $DB_CHOICE =~ ^[12]$ ]]; then
                 
                 echo -e "${GREEN}✅ Better-Auth configured!${NC}"
                 echo "Run: pnpm auth:gen to generate auth types"
+                break
             ;;
         ;;
         esac
@@ -305,33 +309,3 @@ if [[ $DB_CHOICE =~ ^[12]$ ]]; then
 fi
 
 echo -e "${GREEN}\n\n🎉 That's it. Your project is ready! 🚀🚀🚀${NC}\n\n"
-
-
-
-# ---- Cleanup Section ----
-cleanup() {
-    echo -e "\n${CYAN}🧹 Cleaning up...${NC}"
-    # List all files to delete (adjust as needed)
-    FILES_TO_CLEAN=(
-        "$0"
-        "nextjs-setup.sh"
-        "temp_*.log"
-    )
-    
-    for file in "${FILES_TO_CLEAN[@]}"; do
-        if [[ -f "$file" ]]; then
-            rm -f "$file" 2>/dev/null && \
-            echo -e "  ${GREEN}✔ Removed: ${file}${NC}" || \
-            echo -e "  ${YELLOW}⚠ Couldn't remove: ${file}${NC}"
-        fi
-    done
-}
-
-# Set trap for normal exit and interrupts
-trap cleanup EXIT INT TERM
-
-# ... [rest of your script] ...
-
-# Clear the trap at the end if everything succeeded
-trap - EXIT INT TERM
-cleanup
