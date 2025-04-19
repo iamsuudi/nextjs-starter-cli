@@ -207,21 +207,24 @@ if [[ $DB_CHOICE =~ ^[12]$ ]]; then
             1)
                 # ===== PRISMA SEEDING =====
                 echo -e "${CYAN}Downloading Prisma seed template...${NC}"
-                curl -sSL "$PRISMA_SEED_URL" -o "prisma/seed.ts"
-                
-                # Add seed script to package.json
-                pnpm pkg set scripts.seed="pnpm dlx tsx prisma/seed.ts"
-                echo -e "${GREEN}✅ Prisma seed script created!${NC}"
-                echo -e "${YELLOW}Run with: pnpm seed${NC}"
+                if curl -sSL "$PRISMA_SEED_URL" -o "prisma/seed.ts"; then
+                    pnpm pkg set scripts.seed="pnpm dlx tsx prisma/seed.ts"
+                    echo -e "${GREEN}✅ Prisma seed script created!${NC}"
+                    echo -e "${YELLOW}Run with: pnpm seed${NC}"
+                else
+                    echo -e "${RED}❌ Failed to download Prisma seed template${NC}"
+                fi
             ;;
             2)
                 # ===== DRIZZLE SEEDING =====
                 echo -e "${CYAN}Downloading Drizzle seed template...${NC}"
                 mkdir -p drizzle
-                curl -sSL "$DRIZZLE_SEED_URL" -o "drizzle/seed.ts"
-                
-                pnpm pkg set scripts.seed="pnpm dlx tsx drizzle/seed.ts"
-                echo -e "${GREEN}✅ Drizzle seeding configured!${NC}"
+                if curl -sSL "$DRIZZLE_SEED_URL" -o "drizzle/seed.ts"; then
+                    pnpm pkg set scripts.seed="pnpm dlx tsx drizzle/seed.ts"
+                    echo -e "${GREEN}✅ Drizzle seeding configured!${NC}"
+                else
+                    echo -e "${RED}❌ Failed to download Drizzle seed template${NC}"
+                fi
             ;;
         esac
     else
@@ -236,10 +239,10 @@ fi
 echo -e "\n${CYAN}🔐 Better-Auth Configuration${NC}"
 
 # Remote file URLs (replace with your actual raw GitHub URLs)
-AUTH_PRISMA_CONFIG_URL="https://raw.githubusercontent.com/iamsuudi/nextjs-starter-cli/src/lib/auth-prisma.ts"
-AUTH_DRIZZLE_CONFIG_URL="https://raw.githubusercontent.com/iamsuudi/nextjs-starter-cli/src/lib/auth-drizzle.ts"
-AUTH_ROUTE_URL="https://raw.githubusercontent.com/iamsuudi/nextjs-starter-cli/src/app/api/[...all]/route.ts"
-AUTH_CLIENT_URL="https://raw.githubusercontent.com/iamsuudi/nextjs-starter-cli/src/lib/auth-client.ts"
+AUTH_PRISMA_CONFIG_URL="https://raw.githubusercontent.com/iamsuudi/nextjs-starter-cli/main/src/lib/auth-prisma.ts"
+AUTH_DRIZZLE_CONFIG_URL="https://raw.githubusercontent.com/iamsuudi/nextjs-starter-cli/main/src/lib/auth-drizzle.ts"
+AUTH_ROUTE_URL="https://raw.githubusercontent.com/iamsuudi/nextjs-starter-cli/main/src/app/api/[...all]/route.ts"
+AUTH_CLIENT_URL="https://raw.githubusercontent.com/iamsuudi/nextjs-starter-cli/main/src/lib/auth-client.ts"
 
 if [[ $DB_CHOICE =~ ^[12]$ ]]; then
     read -p "$(echo -e ${YELLOW}Enable Better-Auth? [y/N] '>' ${NC})" AUTH_CHOICE
