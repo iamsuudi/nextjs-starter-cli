@@ -43,9 +43,9 @@ echo -e "${GREEN}✅ Entered project directory: $PROJECT_DIR${NC}"
 
 
 # Step 3: shadcn/ui Setup
-echo -e "\n${CYAN}🎨 shadcn/ui Configuration${NC}"
+echo -e "\n${CYAN}🎨 shadcn Configuration${NC}"
 
-read -p "$(echo -e ${YELLOW}Do you want to set up shadcn/ui? [y/N] '>' ${NC})" SHADCN_CHOICE
+read -p "$(echo -e ${YELLOW}Do you want to set up shadcn? [y/N] '>' ${NC})" SHADCN_CHOICE
 
 if [[ "$SHADCN_CHOICE" =~ ^[Yy]$ ]]; then
     echo -e "${GREEN}⚙️ Initializing shadcn/ui...${NC}"
@@ -78,15 +78,15 @@ if [[ "$SHADCN_CHOICE" =~ ^[Yy]$ ]]; then
         echo "${GREEN}- Theme provider"
         echo "- Dark mode toggle"
         echo "- Layout wrapper"
-        echo -e "✅ shadcn/ui configured with remote components!${NC}"
+        echo -e "✅ shadcn configured with remote components!${NC}"
     else
         echo -e "${RED}❌ Error: Failed to download some components${NC}"
     fi
     
     
-    echo -e "${GREEN}\n✅ shadcn/ui configured!${NC}\n"
+    echo -e "${GREEN}\n✅ shadcn configured!${NC}\n"
 else
-    echo -e "${YELLOW}⚠️ Skipping shadcn/ui setup${NC}"
+    echo -e "${YELLOW}⚠️ Skipping shadcn setup${NC}"
 fi
 
 
@@ -124,7 +124,7 @@ while true; do
             pnpm add -D prisma
             
             # Initialize Prisma
-            pnpm dlx prisma init \--datasource-provider sqlite \--output ../src/generated/prisma
+            pnpm dlx prisma init \--datasource-provider sqlite \--output ./client
             
             # Download schema template
             echo -e "${CYAN}Downloading Prisma schema...${NC}"
@@ -312,20 +312,9 @@ echo -e "${GREEN}\n\n🎉 That's it. Your project is ready! 🚀🚀🚀${NC}\n\
 # ---- Cleanup Section ----
 cleanup() {
     echo -e "\n${CYAN}🧹 Cleaning up...${NC}"
-    # List all files to delete (adjust as needed)
-    FILES_TO_CLEAN=(
-        "$0"
-        "nextjs-setup.sh"
-        "temp_*.log"
-    )
-    
-    for file in "${FILES_TO_CLEAN[@]}"; do
-        if [[ -f "$file" ]]; then
-            rm -f "$file" 2>/dev/null && \
-            echo -e "  ${GREEN}✔ Removed: ${file}${NC}" || \
-            echo -e "  ${YELLOW}⚠ Couldn't remove: ${file}${NC}"
-        fi
-    done
+    rm -f "nextjs-setup.sh" 2>/dev/null && \
+    echo -e "  ${GREEN}✔ Removed: ${file}${NC}" || \
+    echo -e "  ${YELLOW}⚠ Couldn't remove: ${file}${NC}"
 }
 
 # Set trap for normal exit and interrupts
