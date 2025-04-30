@@ -7,6 +7,10 @@ on:
 
 concurrency: ${{ github.workflow }}-${{ github.config }}
 
+permissions:
+    contents: write
+    pull-requests: write
+
 jobs:
     publish:
         runs-on: ubuntu-latest
