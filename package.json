@@ -30,9 +30,11 @@
     "build": "tsup src/index.ts --format cjs, esm --dts",
     "dev": "tsx src/index.ts",
     "lint": "tsc --noEmit",
-    "ci": "pnpm run lint && pnpm run build"
+    "ci": "pnpm run lint && pnpm run build",
+    "release": "pnpm run lint && pnpm run build && changeset publish"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.29.2",
     "@clack/prompts": "^0.10.1",
     "@types/node": "^22.15.3",
     "tsup": "^8.4.0",
