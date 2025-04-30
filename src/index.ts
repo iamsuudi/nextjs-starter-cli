@@ -2,7 +2,6 @@
 
 import { intro, outro, select, spinner, text } from "@clack/prompts";
 import { existsSync } from "fs";
-import path from "path";
 import color from "picocolors";
 import { setupShadcn } from "./shadcn";
 import { setupDatabaseAdapter } from "./adapter";
@@ -12,6 +11,9 @@ import { setupBetterAuth } from "./better-auth";
 
 async function main() {
     intro(`${color.cyan("⚡ Next.js Setup Wizard")}`);
+
+    const s = spinner();
+    s.start("Step 1: ");
 
     const packageManager = await select({
         message: "Which package manager do you want to use?",
@@ -40,8 +42,7 @@ async function main() {
         appPath as string
     );
 
-    const s = spinner();
-    s.start(
+    s.message(
         `Creating Next.js app at "${String(appPath)}" using ${String(
             packageManager
         )}...`
@@ -49,24 +50,19 @@ async function main() {
 
     try {
         runInProject(createCommand, process.cwd());
-        s.stop("✅ Next.js app created successfully!");
+        s.message("✔ Next.js app created successfully!");
     } catch (err) {
         s.stop("❌ Failed to create Next.js app.");
         console.error(err);
         process.exit(1);
     }
 
-    const hasSrc = existsSync(path.join(String(appPath), "src"));
-
-    const basePath = hasSrc
-        ? path.join(String(appPath), "src")
-        : String(appPath);
-
     // Shadcn setup
-    await setupShadcn(packageManager as PackageManager, appPath as string);
+    await setupShadcn(s, packageManager as PackageManager, appPath as string);
 
     // Adapter setup
     const adapter = await setupDatabaseAdapter(
+        s,
         packageManager as PackageManager,
         appPath as string
     );
@@ -74,6 +70,7 @@ async function main() {
     if (adapter) {
         // Database Seeding script setup
         await setupSeeding(
+            s,
             packageManager as PackageManager,
             appPath as string,
             adapter
@@ -81,11 +78,14 @@ async function main() {
 
         // Better-Auth setup
         await setupBetterAuth(
+            s,
             packageManager as PackageManager,
             appPath as string,
             adapter
         );
     }
+
+    s.stop();
 
     outro(
         `${color.green("🎉 All done!")} You can now \`cd ${String(

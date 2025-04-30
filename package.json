@@ -19,7 +19,6 @@
   },
   "license": "ISC",
   "author": "Abdulfetah Suudi",
-  "type": "module",
   "main": ".dist/index.js",
   "types": ".dist/index.d.ts",
   "module": ".dist/index.mjs",

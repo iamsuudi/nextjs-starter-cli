@@ -1,14 +1,18 @@
 import path from "path";
 import { existsSync, mkdirSync, appendFileSync, copyFileSync } from "fs";
-import { confirm, spinner } from "@clack/prompts";
+import { confirm } from "@clack/prompts";
 import crypto from "crypto";
 import { editPackageJsonScript, getDlxCommand, installPackages } from "./utils";
+import { SpinnerType } from "./types";
 
 export async function setupBetterAuth(
+    s: SpinnerType,
     pkgManager: "pnpm" | "npm" | "bun",
     projectDir: string,
     adapter: "prisma" | "drizzle"
 ) {
+    s.message("Step 5: ");
+
     if (!["prisma", "drizzle"].includes(adapter)) return;
 
     const enableAuth = await confirm({
@@ -17,15 +21,18 @@ export async function setupBetterAuth(
     });
 
     if (!enableAuth) {
-        console.log("⚠️ Skipping authentication setup.");
+        s.message("⚠️ Skipping authentication setup.");
         return;
     }
 
-    const s = spinner();
-    s.start("🛡️ Configuring Better-Auth...");
+    s.message("🛡️ Configuring Better-Auth...");
 
     // Step 1: Install better-auth
     installPackages(pkgManager, ["better-auth"], projectDir);
+
+    s.message("better-auth installed.");
+
+    s.message("Adding .env variables...");
 
     // Step 2: Append to .env
     const envPath = path.join(projectDir, ".env");
@@ -39,30 +46,32 @@ export async function setupBetterAuth(
     ];
     appendFileSync(envPath, envLines.join("\n"));
 
+    s.message("✔ .env variables added.");
+
     // Step 3: Determine src structure
     const hasSrcDir = existsSync(path.join(projectDir, "src"));
     const basePath = hasSrcDir ? path.join(projectDir, "src") : projectDir;
 
-    const apiAuthDir = path.join(basePath, "app/api/auth/[...all]");
-    const libDir = path.join(basePath, "lib");
-
-    if (!existsSync(apiAuthDir)) mkdirSync(apiAuthDir, { recursive: true });
-    if (!existsSync(libDir)) mkdirSync(libDir, { recursive: true });
-
     // Step 4: Copy templates
-    copyBetterAuthFiles(basePath, adapter);
+    copyBetterAuthFiles(s, basePath, adapter);
 
     // Step 5: Add CLI script
+
+    s.message("Adding auth client generater cli...");
     const cliCmd = getDlxCommand(pkgManager, "@better-auth/cli generate");
     await editPackageJsonScript(projectDir, "auth:gen", cliCmd);
 
-    s.stop(`✅ Better-Auth configured! Run: ${pkgManager} run auth:gen`);
+    s.message(`✔ Better-Auth configured! Run: ${pkgManager} run auth:gen`);
 }
 
 export function copyBetterAuthFiles(
+    s: SpinnerType,
     basePath: string,
     adapter: "prisma" | "drizzle"
 ) {
+    s.message(`Going to copy better-auth files`);
+    s.message("Preparing files destinaion...");
+
     const apiAuthDir = path.join(basePath, "app/api/auth/[...all]");
     const libDir = path.join(basePath, "lib");
 
@@ -73,29 +82,40 @@ export function copyBetterAuthFiles(
         adapter === "prisma"
             ? [
                   {
-                      src: path.join(__dirname, "lib/auth-prisma.ts"),
+                      src: path.join(
+                          __dirname,
+                          "../templates/src/lib/auth-prisma.ts"
+                      ),
                       dest: path.join(libDir, "auth.ts"),
                   },
               ]
             : [
                   {
-                      src: path.join(__dirname, "lib/auth-drizzle.ts"),
+                      src: path.join(
+                          __dirname,
+                          "../templates/src/lib/auth-drizzle.ts"
+                      ),
                       dest: path.join(libDir, "auth.ts"),
                   },
               ];
 
     files.push(
         {
-            src: path.join(__dirname, "app/api/route.ts"),
+            src: path.join(__dirname, "../templates/src/app/api/route.ts"),
             dest: path.join(apiAuthDir, "route.ts"),
         },
         {
-            src: path.join(__dirname, "lib/auth-client.ts"),
+            src: path.join(__dirname, "../templates/src/lib/auth-client.ts"),
             dest: path.join(libDir, "auth-client.ts"),
         }
     );
 
+    s.message("✔ Destination Prepared");
+
     files.forEach(({ src, dest }) => {
         copyFileSync(src, dest);
+        s.message(`Copied to ${dest}`);
     });
+
+    s.message("✔ Copying finished");
 }

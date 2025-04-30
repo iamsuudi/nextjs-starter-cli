@@ -1,14 +1,23 @@
 import { select } from "@clack/prompts";
-import { execSync } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync } from "node:fs";
 import path from "node:path";
 import color from "picocolors";
-import { getInstallCommand, getRunCommand, PackageManager } from "./utils";
+import {
+    getRunCommand,
+    installPackages,
+    PackageManager,
+    runDlxCommand,
+    runInProject,
+} from "./utils";
+import { SpinnerType } from "./types";
 
 export async function setupDatabaseAdapter(
+    s: SpinnerType,
     packageManager: PackageManager,
     projectDir: string
 ) {
+    s.message("Step 3: ");
+
     const db = await select({
         message: "Choose database adapter:",
         options: [
@@ -19,49 +28,57 @@ export async function setupDatabaseAdapter(
     });
 
     if (db === "skip" || db === null) {
-        console.log(color.yellow("⚠️ Skipping database setup"));
+        s.message(color.yellow("⚠️ Skipping database setup"));
         return;
     }
 
-    const run = (cmd: string) =>
-        execSync(cmd, { cwd: projectDir, stdio: "inherit" });
-    const install = (deps: string[], dev = false) =>
-        run(getInstallCommand(packageManager, deps, dev));
-
     if (db === "prisma") {
-        console.log(color.cyan("🛢️ Setting up Prisma..."));
+        s.message(color.cyan("🛢️ Setting up Prisma..."));
 
-        install(["@prisma/client"]);
-        install(["prisma"], true);
+        installPackages(packageManager, ["@prisma/client"], projectDir);
+        installPackages(packageManager, ["prisma"], projectDir, true);
+
+        s.message("prisma and @prisma/client installed.");
 
         // Init Prisma
-        run(
+        runInProject(
             getRunCommand(
                 packageManager,
                 "prisma init --datasource-provider sqlite"
-            )
+            ),
+            projectDir
         );
 
+        s.message("Prisma initialized.");
+
         // Copy local schema + client
-        copyAdapterTemplateFiles(projectDir, "prisma");
+        copyAdapterTemplateFiles(s, projectDir, "prisma");
 
         // Generate client
-        run(getRunCommand(packageManager, "prisma generate"));
+        runDlxCommand(packageManager, "prisma generate", projectDir);
 
-        console.log(color.green("✅ Prisma (SQLite) is ready!"));
+        s.message("Prisma client generated.");
+
+        s.message(color.green("✔ Prisma (SQLite) is ready!"));
 
         return "prisma";
     } else if (db === "drizzle") {
-        console.log(color.cyan("🌪️ Setting up Drizzle..."));
+        s.message(color.cyan("🌪️ Setting up Drizzle..."));
 
-        install(["drizzle-orm", "better-sqlite3"]);
-        install(["drizzle-kit"], true);
+        installPackages(
+            packageManager,
+            ["drizzle-orm", "better-sqlite3"],
+            projectDir
+        );
+        installPackages(packageManager, ["drizzle-kit"], projectDir, true);
+
+        s.message("drizzle-orm, better-sqlite3 and drizzle-kit installed.");
 
         // Copy files
-        copyAdapterTemplateFiles(projectDir, "drizzle");
+        copyAdapterTemplateFiles(s, projectDir, "drizzle");
 
-        console.log(color.green("✅ Drizzle (SQLite) is ready!"));
-        console.log(
+        s.message(color.green("✔ Drizzle (SQLite) is ready!"));
+        s.message(
             color.yellow("ℹ️ Run: ") +
                 getRunCommand(packageManager, "drizzle-kit generate")
         );
@@ -71,14 +88,16 @@ export async function setupDatabaseAdapter(
 }
 
 export function copyAdapterTemplateFiles(
+    s: SpinnerType,
     projectDir: string,
     adapter: "prisma" | "drizzle"
 ) {
-    const hasSrc = existsSync(path.join(projectDir, "src"));
+    s.message(`Going to copy ${adapter} files`);
+    s.message("Preparing files destinaion...");
 
+    const hasSrc = existsSync(path.join(projectDir, "src"));
     const basePath = hasSrc ? path.join(projectDir, "src") : projectDir;
     const libDir = path.join(basePath, "lib");
-
     if (!existsSync(libDir)) mkdirSync(libDir, { recursive: true });
 
     const files: { src: string; dest: string }[] = [];
@@ -86,26 +105,28 @@ export function copyAdapterTemplateFiles(
     if (adapter === "prisma") {
         files.push(
             {
-                src: path.join(__dirname, "lib/prisma.ts"),
+                src: path.join(__dirname, "../templates/src/lib/prisma.ts"),
                 dest: path.join(libDir, "prisma.ts"),
             },
             {
-                src: path.join(__dirname, "../prisma/schema.prisma"),
+                src: path.join(__dirname, "../templates/prisma/schema.prisma"),
                 dest: path.join(projectDir, "prisma/schema.prisma"),
             }
         );
     } else if (adapter === "drizzle") {
         files.push(
             {
-                src: path.join(__dirname, "lib/drizzle.ts"),
+                src: path.join(__dirname, "../templates/src/lib/drizzle.ts"),
                 dest: path.join(libDir, "drizzle.ts"),
             },
             {
-                src: path.join(__dirname, "../drizzle/config.ts"),
+                src: path.join(__dirname, "../templates/drizzle/config.ts"),
                 dest: path.join(projectDir, "drizzle/config.ts"),
             }
         );
     }
+
+    s.message("✔ Destination Prepared");
 
     files.forEach(({ src, dest }) => {
         // Ensure parent directories exist
@@ -113,6 +134,8 @@ export function copyAdapterTemplateFiles(
         if (!existsSync(parentDir)) mkdirSync(parentDir, { recursive: true });
 
         copyFileSync(src, dest);
-        console.log(`✅ Copied to ${dest}`);
+        s.message(`Copied to ${dest}`);
     });
+
+    s.message("✔ Copying finished");
 }
