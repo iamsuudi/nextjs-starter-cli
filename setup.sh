@@ -306,22 +306,3 @@ if [[ $DB_CHOICE =~ ^[12]$ ]]; then
 fi
 
 echo -e "${GREEN}\n\n🎉 That's it. Your project is ready! 🚀🚀🚀${NC}\n\n"
-
-
-
-# ---- Cleanup Section ----
-cleanup() {
-    echo -e "\n${CYAN}🧹 Cleaning up...${NC}"
-    rm -f "nextjs-setup.sh" 2>/dev/null && \
-    echo -e "  ${GREEN}✔ Removed: ${file}${NC}" || \
-    echo -e "  ${YELLOW}⚠ Couldn't remove: ${file}${NC}"
-}
-
-# Set trap for normal exit and interrupts
-trap cleanup EXIT INT TERM
-
-# ... [rest of your script] ...
-
-# Clear the trap at the end if everything succeeded
-trap - EXIT INT TERM
-cleanup

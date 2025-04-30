@@ -1,0 +1,41 @@
+{
+  "name": "nextjs-starter-cli",
+  "version": "0.0.1",
+  "description": "\"Bootstrap your next.js project with pre-setup shadcn configured with its theme-provider, prisma/drizzle adapters, seeding script, and better-auth.\"",
+  "keywords": [
+    "next.js",
+    "prisma",
+    "shadcn",
+    "drizzle",
+    "better-auth"
+  ],
+  "homepage": "https://github.com/iamsuudi/nextjs-starter-cli#readme",
+  "bugs": {
+    "url": "https://github.com/iamsuudi/nextjs-starter-cli/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iamsuudi/nextjs-starter-cli.git"
+  },
+  "license": "ISC",
+  "author": "Abdulfetah Suudi",
+  "type": "module",
+  "main": ".dist/index.js",
+  "types": ".dist/index.d.ts",
+  "module": ".dist/index.mjs",
+  "bin": {
+    "nextjs-starter": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs, esm --dts",
+    "dev": "tsx src/index.ts",
+    "lint": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@clack/prompts": "^0.10.1",
+    "@types/node": "^22.15.3",
+    "tsup": "^8.4.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}
