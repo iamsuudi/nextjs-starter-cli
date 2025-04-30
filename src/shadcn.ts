@@ -1,4 +1,4 @@
-import { spinner } from "@clack/prompts";
+import { spinner, confirm } from "@clack/prompts";
 import { existsSync, mkdirSync, copyFileSync } from "fs";
 import path from "path";
 import {
@@ -13,6 +13,15 @@ export async function setupShadcn(
     packageManager: PackageManager,
     projectDir: string
 ) {
+    const shouldSetup = await confirm({
+        message: "Would you like to set up shadcn/ui?",
+    });
+
+    if (!shouldSetup) {
+        console.log("⚠️ Skipping shadcn/ui setup.");
+        return;
+    }
+
     const s = spinner();
     s.start(`Setting up shadcn in "${projectDir}"...`);
 
@@ -27,7 +36,7 @@ export async function setupShadcn(
         // Add some components
         const installDlxCommand = getDlxCommand(
             packageManager,
-            "shadxcn@latest add button dropdown-menu"
+            "shadcn@latest add button dropdown-menu"
         );
         runDlxCommand(packageManager, installDlxCommand, projectDir);
 
@@ -35,12 +44,12 @@ export async function setupShadcn(
         const installCommand = getInstallCommand(packageManager, [
             "next-themes",
         ]);
-        runInProject(installCommand, process.cwd());
+        runInProject(installCommand, projectDir);
 
-        // After the installation, copy the necessary template files
+        // Copy template files
         copyShadcnTemplateFiles(projectDir);
 
-        s.stop("Shadcn setup completed successfully!");
+        s.stop("✅ Shadcn setup completed successfully!");
     } catch (err) {
         s.stop("❌ Failed to set up shadcn.");
         console.error(err);
