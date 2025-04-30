@@ -10,11 +10,11 @@ export const getCreateNextCommand = (
 ) => {
     switch (pkg) {
         case "pnpm":
-            return `pnpm create next-app@latest ${projectPath}`;
+            return `pnpm create next-app@latest ${projectPath} -y`;
         case "npm":
-            return `npm create next-app@latest ${projectPath}`;
+            return `npm create next-app@latest ${projectPath} -y`;
         case "bun":
-            return `bun create next-app ${projectPath}`;
+            return `bun create next-app ${projectPath} -y`;
         default:
             throw new Error(`Unsupported package manager: ${pkg}`);
     }

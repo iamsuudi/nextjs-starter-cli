@@ -1,44 +1,50 @@
-import { spinner, confirm } from "@clack/prompts";
+import { confirm } from "@clack/prompts";
 import { existsSync, mkdirSync, copyFileSync } from "fs";
 import path from "path";
 import {
-    getDlxCommand,
     getInstallCommand,
     PackageManager,
     runDlxCommand,
     runInProject,
 } from "./utils";
+import { SpinnerType } from "./types";
 
 export async function setupShadcn(
+    s: SpinnerType,
     packageManager: PackageManager,
     projectDir: string
 ) {
+    s.message("Step 2: ");
+
     const shouldSetup = await confirm({
         message: "Would you like to set up shadcn/ui?",
     });
 
     if (!shouldSetup) {
-        console.log("⚠️ Skipping shadcn/ui setup.");
+        s.message("⚠️ Skipping shadcn/ui setup.");
         return;
     }
 
-    const s = spinner();
-    s.start(`Setting up shadcn in "${projectDir}"...`);
+    s.message(`Setting up shadcn in "${projectDir}"...`);
 
     try {
         // Initialize shadcn
-        const initDlxCommand = getDlxCommand(
+        runDlxCommand(
             packageManager,
-            "shadcn@latest init"
+            "shadcn@latest init -y --base-color neutral",
+            projectDir
         );
-        runDlxCommand(packageManager, initDlxCommand, projectDir);
+
+        s.message("Shadcn initialized.");
 
         // Add some components
-        const installDlxCommand = getDlxCommand(
+        runDlxCommand(
             packageManager,
-            "shadcn@latest add button dropdown-menu"
+            "shadcn@latest add button dropdown-menu",
+            projectDir
         );
-        runDlxCommand(packageManager, installDlxCommand, projectDir);
+
+        s.message("Shadcn button and dropdown-menu components added.");
 
         // Install next-themes package
         const installCommand = getInstallCommand(packageManager, [
@@ -46,10 +52,12 @@ export async function setupShadcn(
         ]);
         runInProject(installCommand, projectDir);
 
-        // Copy template files
-        copyShadcnTemplateFiles(projectDir);
+        s.message("next-theme package installed.");
 
-        s.stop("✅ Shadcn setup completed successfully!");
+        // Copy template files
+        copyShadcnTemplateFiles(s, projectDir);
+
+        s.stop("✔ Shadcn setup completed successfully!");
     } catch (err) {
         s.stop("❌ Failed to set up shadcn.");
         console.error(err);
@@ -57,9 +65,11 @@ export async function setupShadcn(
     }
 }
 
-function copyShadcnTemplateFiles(projectDir: string) {
-    const hasSrc = existsSync(path.join(projectDir, "src"));
+function copyShadcnTemplateFiles(s: SpinnerType, projectDir: string) {
+    s.message("Going to copy shadcn files");
+    s.message("Preparing files destinaion...");
 
+    const hasSrc = existsSync(path.join(projectDir, "src"));
     const basePath = hasSrc ? path.join(projectDir, "src") : projectDir;
     const componentsDir = path.join(basePath, "components");
     const appDir = path.join(basePath, "app");
@@ -68,23 +78,33 @@ function copyShadcnTemplateFiles(projectDir: string) {
         mkdirSync(componentsDir, { recursive: true });
     if (!existsSync(appDir)) mkdirSync(appDir, { recursive: true });
 
+    s.message("✔ Destination Prepared");
+
     const files = [
         {
-            src: path.join(__dirname, "components/theme-provider.tsx"),
+            src: path.join(
+                __dirname,
+                "../templates/src/components/theme-provider.tsx"
+            ),
             dest: path.join(componentsDir, "theme-provider.tsx"),
         },
         {
-            src: path.join(__dirname, "components/mode-toggle.tsx"),
+            src: path.join(
+                __dirname,
+                "../templates/src/components/mode-toggle.tsx"
+            ),
             dest: path.join(componentsDir, "mode-toggle.tsx"),
         },
         {
-            src: path.join(__dirname, "app/layout.tsx"),
+            src: path.join(__dirname, "../templates/src/app/layout.tsx"),
             dest: path.join(appDir, "layout.tsx"),
         },
     ];
 
     files.forEach(({ src, dest }) => {
         copyFileSync(src, dest);
-        console.log(`✅ Copied to ${dest}`);
+        s.message(`Copied to ${dest}`);
     });
+
+    s.message("✔ Copying finished");
 }
