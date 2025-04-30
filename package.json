@@ -1,5 +1,5 @@
 {
-  "name": "@iamsuudi/nextjs-starter-cli",
+  "name": "nextjs-start-cli",
   "version": "0.0.1",
   "description": "\"Bootstrap your next.js project with pre-setup shadcn configured with its theme-provider, prisma/drizzle adapters, seeding script, and better-auth.\"",
   "keywords": [
