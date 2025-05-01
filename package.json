@@ -24,8 +24,13 @@
   "module": ".dist/index.mjs",
   "private": false,
   "bin": {
-    "nextjs-starter": "dist/index.js"
+    "nextjs-start-cli": "dist/index.js"
   },
+  "files": [
+    "dist",
+    "templates",
+    "!src"
+  ],
   "scripts": {
     "build": "tsup src/index.ts --format cjs, esm --dts",
     "dev": "tsx src/index.ts",
