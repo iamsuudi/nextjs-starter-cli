@@ -10,11 +10,11 @@ export const getCreateNextCommand = (
 ) => {
     switch (pkg) {
         case "pnpm":
-            return `pnpm create next-app@latest ${projectPath} -y`;
+            return `pnpm create next-app@latest ${projectPath} --ts --tailwind --eslint --app --src-dir --turbopack --import-alias "@/*"`;
         case "npm":
-            return `npm create next-app@latest ${projectPath} -y`;
+            return `npm create next-app@latest ${projectPath} --ts --tailwind --eslint --app --src-dir --turbopack --import-alias "@/*"`;
         case "bun":
-            return `bun create next-app ${projectPath} -y`;
+            return `bun create next-app ${projectPath} --ts --tailwind --eslint --app --src-dir --turbopack --import-alias "@/*"`;
         default:
             throw new Error(`Unsupported package manager: ${pkg}`);
     }
