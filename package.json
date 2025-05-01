@@ -26,12 +26,6 @@
   "bin": {
     "nextjs-start-cli": "dist/index.js"
   },
-  "files": [
-    "dist",
-    "public",
-    "templates",
-    "!src"
-  ],
   "scripts": {
     "build": "tsup src/index.ts --format cjs, esm --dts",
     "dev": "tsx src/index.ts",
