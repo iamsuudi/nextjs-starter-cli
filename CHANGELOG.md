@@ -1,5 +1,11 @@
 # nextjs-start-cli
 
+## 0.1.2
+
+### Patch Changes
+
+- f9e573f: Place all interactivity before installations
+
 ## 0.1.1
 
 ### Patch Changes
