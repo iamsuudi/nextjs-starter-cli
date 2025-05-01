@@ -1,97 +1,141 @@
-# Next.js Starter CLI
+# 🚀 nextjs-start-cli
 
-A zero-to-production CLI tool to bootstrap Next.js projects with:  
-✅ Database (Prisma/Drizzle + SQLite)  
-✅ Authentication (Better-Auth)  
-✅ UI Components (shadcn/ui)
+A beautiful, opinionated CLI tool to scaffold fully-featured Next.js 15+ projects with ease.  
+Supports **shadcn/ui**, **Better-Auth**, **Prisma** or **Drizzle**, SQLite setup, multi-package manager support (`pnpm`, `npm`, `bun`) — and all the batteries included!
 
-## Features
+---
 
--   **One-command setup** for full-stack Next.js apps
--   **DB Adapters**: Choose between Prisma or Drizzle
--   **Modern Auth**: Better-Auth with session management
--   **Beautiful UI**: shadcn/ui components pre-configured
--   **Dev-Friendly**: SQLite for development, easy production switch
+## 🎥 Demo
 
-## How to Use
+<p align="center">
+  <a href="https://ik.imagekit.io/1xdonvuj2/Screencast_From_2025_05_01_09_23_23.mp4" target="_blank">
+    <img src="screenshot.png" alt="Watch the demo" style="max-width: 800px; width: 100%;">
+  </a>
+</p>
 
-Run the following command directly in your terminal to download and execute the script automatically:
+<!-- [![nextjs-start-cli demo](/screenshot.png)](https://ik.imagekit.io/1xdonvuj2/Screencast_From_2025_05_01_09_23_23.mp4?updatedAt=1746088609623) -->
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/iamsuudi/nextjs-starter-cli/main/setup.sh -o nextjs-setup.sh && chmod +x nextjs-setup.sh && ./nextjs-setup.sh
-```
+## ✨ Features
 
-Or use `wget`:
+-   ⚡ Fast and interactive setup with [`@clack/prompts`](https://github.com/natemoo-re/clack)
+-   📦 Supports `pnpm`, `npm`, and `bun`
+-   🎨 Fully configured shadcn/ui
+-   🛠️ Choose between Prisma or Drizzle as the database adapter
+-   🔐 Authentication powered by Better Auth (pre-integrated)
+-   🧩 Modular structure with optional src/ directory support
+-   🧱 Prebuilt templates for layout, components, theme provider, and more
 
-```bash
-wget https://raw.githubusercontent.com/iamsuudi/nextjs-starter-cli/main/setup.sh -O nextjs-setup.sh && chmod +x nextjs-setup.sh && ./nextjs-setup.sh
-```
+---
 
-### 2. Follow the interactive prompts
-
-The script will guide you through:
-
--   Database adapter selection
--   Authentication setup
--   UI component configuration
-
-## Manual Installation
-
-Prefer manual control? Run these individually:
+## 📦 Installation
 
 ```bash
-# 1. Database
-pnpm add @prisma/client
-pnpm dlx prisma init
+# Using pnpm
+pnpm dlx nextjs-start-cli
 
-# 2. Authentication
-pnpm add better-auth
-pnpm dlx @better-auth/cli generate
+# Using npm
+npx nextjs-start-cli
 
-# 3. UI Components
-pnpm dlx shadcn-ui@latest init
+# Using bun
+bunx nextjs-start-cli
 ```
 
-## Project Structure
+---
 
-After setup:
+## 🧪 What You Get
 
+After running the CLI, you'll get:
+
+-   A fresh Next.js app (`app/` directory routing)
+-   `tailwind.config.ts` and `postcss.config.js`
+-   `@shadcn/ui` installed and configured with dark/light mode
+-   Components like `Button`, `DropdownMenu`, `ThemeProvider`, `ModeToggle`
+-   Optional `Prisma` or `Drizzle` + SQLite setup
+-   Database schema or config files
+-   `Latest prisma client setup`
+-   Optional Database `seeding script`
+-   Full `Better-Auth` set-up for `client` and `server` components
+-   Sensible `.gitignore` and initial env scaffolding
+
+---
+
+## 🛠️ Usage
+
+After running the CLI:
+
+```bash
+# Start your Next.js project
+cd your-project-name
+pnpm dev
 ```
-my-app/
-├── prisma/          # Database schema
-├── src/lib/auth     # Authentication config
-├── components/ui/   # shadcn components
-├── lib/prisma       # Database client
-└── .env             # Environment variables
+
+If you chose Prisma:
+
+```bash
+pnpm dlx prisma migrate dev
 ```
 
-## Commands Cheatsheet
+If you chose Drizzle:
 
-| Command              | Description                       |
-| -------------------- | --------------------------------- |
-| `pnpm dev`           | Start development server          |
-| `pnpm seed`   | Seed DB (Prisma)       |
-| `pnpm auth:gen`      | Generate auth types (Better-Auth) |
-| `pnpm ui add button` | Add shadcn component              |
-
-## Customization
-
-### Switching Databases
-
-Edit these files for production:
-
--   **Prisma**: `prisma/schema.prisma`
--   **Drizzle**: `drizzle/config.ts`
-
-### Theming
-
-Modify colors in:
-
-```css
-/* globals.css */
-@layer base {
-    :root {
-        --primary: 222.2 47.4% 11.2%;
-    }
-}
+```bash
+pnpm dlx drizzle-kit generate
 ```
+
+---
+
+## 📁 Folder Structure
+
+```bash
+your-project/
+├── app/
+│   └── layout.tsx
+├── components/
+│   ├── button.tsx
+│   ├── dropdown-menu.tsx
+│   ├── mode-toggle.tsx
+│   └── theme-provider.tsx
+├── lib/
+│   ├── auth-client.tsx
+│   ├── auth.tsx
+│   └── prisma.ts / drizzle.ts
+├── prisma/             # If Prisma is chosen
+│   ├── schema.prisma
+│   └── seed.ts
+├── drizzle/            # If Drizzle is chosen
+│   └── config.ts
+├── tailwind.config.ts
+├── tsconfig.json
+└── .gitignore
+```
+
+---
+
+## 📦 Tech Stack
+
+-   [Next.js 15](https://nextjs.org/)
+-   [TypeScript](https://www.typescriptlang.org/)
+-   [TailwindCSS](https://tailwindcss.com/)
+-   [shadcn/ui](https://ui.shadcn.com/)
+-   [Prisma](https://www.prisma.io/) or [Drizzle](https://orm.drizzle.team/)
+-   [@clack/prompts](https://github.com/natemoo-re/clack)
+-   [Better-Auth](https://www.better-auth.com/)
+
+---
+
+## 🙌 Contributing
+
+Contributions, ideas, and feedback are welcome!  
+Feel free to open issues or submit pull requests.
+
+---
+
+## 📜 License
+
+MIT © [Abdulfetah Suudi](https://github.com/iamsuudi)
+
+---
+
+## ⭐️ Show your support
+
+If you find this project helpful, consider starring the repo ⭐  
+That helps others discover it!
