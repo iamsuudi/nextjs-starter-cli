@@ -2,7 +2,7 @@ import path from "path";
 import { existsSync, mkdirSync, appendFileSync, copyFileSync } from "fs";
 import { confirm } from "@clack/prompts";
 import crypto from "crypto";
-import { editPackageJsonScript, getDlxCommand, installPackages } from "./utils";
+import { editPackageJson, getDlxCommand, installPackages } from "./utils";
 import { SpinnerType } from "./types";
 
 export async function setupBetterAuth(
@@ -59,7 +59,7 @@ export async function setupBetterAuth(
 
     s.message("Adding auth client generater cli...");
     const cliCmd = getDlxCommand(pkgManager, "@better-auth/cli generate");
-    await editPackageJsonScript(projectDir, "auth:gen", cliCmd);
+    await editPackageJson(projectDir, "scripts.auth:gen", cliCmd);
 
     s.message(`✔ Better-Auth configured! Run: ${pkgManager} run auth:gen`);
 }

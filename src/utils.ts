@@ -1,5 +1,5 @@
 import { execSync } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 export type PackageManager = "pnpm" | "npm" | "bun";
@@ -85,12 +85,39 @@ export const getRunCommand = (pkg: string, cmd: string) => {
     }
 };
 
-export async function editPackageJsonScript(projectDir: string, scriptName: string, command: string) {
+export async function editPackageJson(
+    projectDir: string,
+    fieldPath: string,
+    value: string
+) {
     const pkgJsonPath = path.join(projectDir, "package.json");
     const pkg = JSON.parse(readFileSync(pkgJsonPath, "utf-8"));
 
-    pkg.scripts = pkg.scripts || {};
-    pkg.scripts[scriptName] = command;
+    // Handle dot notation (e.g., "prisma.schema")
+    const pathParts = fieldPath.split(".");
+    let current = pkg;
+
+    for (let i = 0; i < pathParts.length - 1; i++) {
+        const part = pathParts[i];
+        if (!current[part] || typeof current[part] !== "object") {
+            current[part] = {};
+        }
+        current = current[part];
+    }
+
+    const lastPart = pathParts[pathParts.length - 1];
+    current[lastPart] = value;
 
     writeFileSync(pkgJsonPath, JSON.stringify(pkg, null, 2));
+}
+
+export function deletePrismaSchema(projectDir: string) {
+    const schemaPath = path.join(projectDir, "prisma", "schema.prisma");
+
+    if (existsSync(schemaPath)) {
+        rmSync(schemaPath);
+        console.log(`🗑️ Deleted default schema.prisma`);
+    } else {
+        console.log(`⚠️ schema.prisma not found, skipping delete.`);
+    }
 }

@@ -3,6 +3,8 @@ import { copyFileSync, existsSync, mkdirSync } from "node:fs";
 import path from "node:path";
 import color from "picocolors";
 import {
+    deletePrismaSchema,
+    editPackageJson,
     getRunCommand,
     installPackages,
     PackageManager,
@@ -51,8 +53,12 @@ export async function setupDatabaseAdapter(
 
         s.message("Prisma initialized.");
 
+        deletePrismaSchema(projectDir);
+
         // Copy local schema + client
         copyAdapterTemplateFiles(s, projectDir, "prisma");
+
+        await editPackageJson(projectDir, "prisma.schema", "./prisma/models");
 
         // Generate client
         runDlxCommand(packageManager, "prisma generate", projectDir);
@@ -109,8 +115,11 @@ export function copyAdapterTemplateFiles(
                 dest: path.join(libDir, "prisma.ts"),
             },
             {
-                src: path.join(__dirname, "../templates/prisma/schema.prisma"),
-                dest: path.join(projectDir, "prisma/schema.prisma"),
+                src: path.join(
+                    __dirname,
+                    "../templates/prisma/models/schema.prisma"
+                ),
+                dest: path.join(projectDir, "prisma/models/schema.prisma"),
             }
         );
     } else if (adapter === "drizzle") {

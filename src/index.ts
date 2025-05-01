@@ -24,6 +24,7 @@ async function main() {
         ],
     });
 
+    s.message("Step 2: ");
     const appPath = await text({
         message: "Where do you want to create your project?",
         placeholder: "my-next-app",

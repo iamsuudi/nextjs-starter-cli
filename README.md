@@ -9,7 +9,7 @@ Supports **shadcn/ui**, **Better-Auth**, **Prisma** or **Drizzle**, SQLite setup
 
 <p align="center">
   <a href="https://ik.imagekit.io/1xdonvuj2/Screencast_From_2025_05_01_09_23_23.mp4" target="_blank">
-    <img src="screenshot.png" alt="Watch the demo" style="max-width: 800px; width: 100%;">
+    <img src="public/screenshot.png" alt="Watch the demo" style="max-width: 800px; width: 100%;">
   </a>
 </p>
 

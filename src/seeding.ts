@@ -1,7 +1,7 @@
 import path from "path";
 import { copyFileSync, existsSync, mkdirSync } from "fs";
 import { confirm } from "@clack/prompts";
-import { editPackageJsonScript, getDlxCommand } from "./utils";
+import { editPackageJson, getDlxCommand } from "./utils";
 import { SpinnerType } from "./types";
 
 export async function setupSeeding(
@@ -55,7 +55,7 @@ export async function setupSeeding(
             pkgManager,
             `tsx ${path.relative(projectDir, dest)}`
         );
-        await editPackageJsonScript(projectDir, "seed", runCommand);
+        await editPackageJson(projectDir, "scripts.seed", runCommand);
 
         s.message(
             `✔ ${
