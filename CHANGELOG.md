@@ -1,5 +1,11 @@
 # nextjs-start-cli
 
+## 0.1.0
+
+### Minor Changes
+
+- 952f828: Prisma multi-schema(models) enabled by default
+
 ## 0.0.3
 
 ### Patch Changes
