@@ -14,33 +14,17 @@ import {
 import { SpinnerType } from "./types";
 
 export async function setupDatabaseAdapter(
-    s: SpinnerType,
+    db: "prisma" | "drizzle",
     packageManager: PackageManager,
     projectDir: string
 ) {
-    s.message("Step 3: ");
-
-    const db = await select({
-        message: "Choose database adapter:",
-        options: [
-            { value: "prisma", label: "Prisma + SQLite" },
-            { value: "drizzle", label: "Drizzle + SQLite" },
-            { value: "skip", label: "Skip database setup" },
-        ],
-    });
-
-    if (db === "skip" || db === null) {
-        s.message(color.yellow("⚠️ Skipping database setup"));
-        return;
-    }
-
     if (db === "prisma") {
-        s.message(color.cyan("🛢️ Setting up Prisma..."));
+        // s.message(color.cyan("🛢️ Setting up Prisma..."));
 
         installPackages(packageManager, ["@prisma/client"], projectDir);
         installPackages(packageManager, ["prisma"], projectDir, true);
 
-        s.message("prisma and @prisma/client installed.");
+        // s.message("prisma and @prisma/client installed.");
 
         // Init Prisma
         runInProject(
@@ -51,25 +35,25 @@ export async function setupDatabaseAdapter(
             projectDir
         );
 
-        s.message("Prisma initialized.");
+        // s.message("Prisma initialized.");
 
         deletePrismaSchema(projectDir);
 
         // Copy local schema + client
-        copyAdapterTemplateFiles(s, projectDir, "prisma");
+        copyAdapterTemplateFiles( projectDir, "prisma");
 
         await editPackageJson(projectDir, "prisma.schema", "./prisma/models");
 
         // Generate client
         runDlxCommand(packageManager, "prisma generate", projectDir);
 
-        s.message("Prisma client generated.");
+        // s.message("Prisma client generated.");
 
-        s.message(color.green("✔ Prisma (SQLite) is ready!"));
+        // s.message(color.green("✔ Prisma (SQLite) is ready!"));
 
         return "prisma";
     } else if (db === "drizzle") {
-        s.message(color.cyan("🌪️ Setting up Drizzle..."));
+        // s.message(color.cyan("🌪️ Setting up Drizzle..."));
 
         installPackages(
             packageManager,
@@ -78,28 +62,28 @@ export async function setupDatabaseAdapter(
         );
         installPackages(packageManager, ["drizzle-kit"], projectDir, true);
 
-        s.message("drizzle-orm, better-sqlite3 and drizzle-kit installed.");
+        // s.message("drizzle-orm, better-sqlite3 and drizzle-kit installed.");
 
         // Copy files
-        copyAdapterTemplateFiles(s, projectDir, "drizzle");
+        copyAdapterTemplateFiles(projectDir, "drizzle");
 
-        s.message(color.green("✔ Drizzle (SQLite) is ready!"));
-        s.message(
-            color.yellow("ℹ️ Run: ") +
-                getRunCommand(packageManager, "drizzle-kit generate")
-        );
+        // s.message(color.green("✔ Drizzle (SQLite) is ready!"));
+        // s.message(
+        //     color.yellow("ℹ️ Run: ") +
+        //         getRunCommand(packageManager, "drizzle-kit generate")
+        // );
 
         return "drizzle";
     }
 }
 
 export function copyAdapterTemplateFiles(
-    s: SpinnerType,
+    // s: SpinnerType,
     projectDir: string,
     adapter: "prisma" | "drizzle"
 ) {
-    s.message(`Going to copy ${adapter} files`);
-    s.message("Preparing files destinaion...");
+    // s.message(`Going to copy ${adapter} files`);
+    // s.message("Preparing files destinaion...");
 
     const hasSrc = existsSync(path.join(projectDir, "src"));
     const basePath = hasSrc ? path.join(projectDir, "src") : projectDir;
@@ -135,7 +119,7 @@ export function copyAdapterTemplateFiles(
         );
     }
 
-    s.message("✔ Destination Prepared");
+    // s.message("✔ Destination Prepared");
 
     files.forEach(({ src, dest }) => {
         // Ensure parent directories exist
@@ -143,8 +127,8 @@ export function copyAdapterTemplateFiles(
         if (!existsSync(parentDir)) mkdirSync(parentDir, { recursive: true });
 
         copyFileSync(src, dest);
-        s.message(`Copied to ${dest}`);
+        // s.message(`Copied to ${dest}`);
     });
 
-    s.message("✔ Copying finished");
+    // s.message("✔ Copying finished");
 }

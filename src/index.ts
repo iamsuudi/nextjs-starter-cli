@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { intro, outro, select, spinner, text } from "@clack/prompts";
+import { intro, outro, select, spinner, text, confirm } from "@clack/prompts";
 import { existsSync } from "fs";
 import color from "picocolors";
 import { setupShadcn } from "./shadcn";
@@ -13,8 +13,8 @@ async function main() {
     intro(`${color.cyan("⚡ Next.js Setup Wizard")}`);
 
     const s = spinner();
-    s.start("Step 1: ");
 
+    s.start("Step 1: ");
     const packageManager = await select({
         message: "Which package manager do you want to use?",
         options: [
@@ -38,12 +38,55 @@ async function main() {
         },
     });
 
+    s.message("Step 3: ");
+    const shouldSetup = await confirm({
+        message: "Would you like to set up shadcn/ui?",
+    });
+    if (!shouldSetup) {
+        s.message("⚠️ Skipping shadcn/ui setup.");
+    }
+
+    s.message("Step 4: ");
+    const db = await select({
+        message: "Choose database adapter:",
+        options: [
+            { value: "prisma", label: "Prisma + SQLite" },
+            { value: "drizzle", label: "Drizzle + SQLite" },
+            { value: "skip", label: "Skip database setup" },
+        ],
+    });
+    if (db === "skip" || db === null) {
+        s.message(color.yellow("⚠️ Skipping database setup"));
+    }
+
+    let shouldSeed: boolean | symbol = false;
+    s.message("Step 6: ");
+    if (["prisma", "drizzle"].includes(db as string)) {
+        shouldSeed = await confirm({
+            message: "Add database seeding script?",
+            initialValue: true,
+        });
+    } else if (!shouldSeed) {
+        s.message("⚠️ Skipping seeding setup.");
+    }
+
+    let enableAuth: boolean | symbol = false;
+    s.message("Step 7: ");
+    if (["prisma", "drizzle"].includes(db as string)) {
+        enableAuth = await confirm({
+            message: "Enable Better-Auth?",
+            initialValue: true,
+        });
+    } else if (!enableAuth) {
+        s.message("⚠️ Skipping authentication setup.");
+    }
+
     const createCommand = getCreateNextCommand(
         packageManager as PackageManager,
         appPath as string
     );
 
-    s.message(
+    s.stop(
         `Creating Next.js app at "${String(appPath)}" using ${String(
             packageManager
         )}...`
@@ -59,11 +102,11 @@ async function main() {
     }
 
     // Shadcn setup
-    await setupShadcn(s, packageManager as PackageManager, appPath as string);
+    await setupShadcn(packageManager as PackageManager, appPath as string);
 
     // Adapter setup
     const adapter = await setupDatabaseAdapter(
-        s,
+        db as "prisma" | "drizzle",
         packageManager as PackageManager,
         appPath as string
     );
@@ -71,7 +114,6 @@ async function main() {
     if (adapter) {
         // Database Seeding script setup
         await setupSeeding(
-            s,
             packageManager as PackageManager,
             appPath as string,
             adapter
@@ -79,14 +121,11 @@ async function main() {
 
         // Better-Auth setup
         await setupBetterAuth(
-            s,
             packageManager as PackageManager,
             appPath as string,
             adapter
         );
     }
-
-    s.stop();
 
     outro(
         `${color.green("🎉 All done!")} You can now \`cd ${String(
