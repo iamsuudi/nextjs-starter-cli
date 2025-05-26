@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
-import { intro, outro, select, spinner, text, confirm } from "@clack/prompts";
-import { existsSync } from "fs";
+import { intro, outro, select, spinner, confirm } from "@clack/prompts";
 import color from "picocolors";
 import { setupShadcn } from "./shadcn";
 import { setupDatabaseAdapter } from "./adapter";
@@ -10,6 +9,8 @@ import { setupSeeding } from "./seeding";
 import { setupBetterAuth } from "./better-auth";
 
 async function main() {
+    const appPath = "my-next-app";
+
     intro(`${color.cyan("⚡ Next.js Setup Wizard")}`);
 
     const s = spinner();
@@ -25,20 +26,6 @@ async function main() {
     });
 
     s.message("Step 2: ");
-    const appPath = await text({
-        message: "Where do you want to create your project?",
-        placeholder: "my-next-app",
-        validate: (value) => {
-            if (!value || !/^[a-zA-Z0-9/_-]+$/.test(value)) {
-                return "Please enter a valid path (alphanumeric, /, -, _ allowed)";
-            }
-            if (existsSync(value)) {
-                return "A folder with this path already exists";
-            }
-        },
-    });
-
-    s.message("Step 3: ");
     const shouldSetup = await confirm({
         message: "Would you like to set up shadcn/ui?",
     });
@@ -46,7 +33,7 @@ async function main() {
         s.message("⚠️ Skipping shadcn/ui setup.");
     }
 
-    s.message("Step 4: ");
+    s.message("Step 3: ");
     const db = await select({
         message: "Choose database adapter:",
         options: [
@@ -60,7 +47,7 @@ async function main() {
     }
 
     let shouldSeed: boolean | symbol = false;
-    s.message("Step 6: ");
+    s.message("Step 4: ");
     if (["prisma", "drizzle"].includes(db as string)) {
         shouldSeed = await confirm({
             message: "Add database seeding script?",
@@ -71,7 +58,7 @@ async function main() {
     }
 
     let enableAuth: boolean | symbol = false;
-    s.message("Step 7: ");
+    s.message("Step 5: ");
     if (["prisma", "drizzle"].includes(db as string)) {
         enableAuth = await confirm({
             message: "Enable Better-Auth?",
@@ -102,7 +89,9 @@ async function main() {
     }
 
     // Shadcn setup
-    await setupShadcn(packageManager as PackageManager, appPath as string);
+    if (shouldSetup) {
+        await setupShadcn(packageManager as PackageManager, appPath as string);
+    }
 
     // Adapter setup
     const adapter = await setupDatabaseAdapter(
