@@ -1,5 +1,11 @@
 # nextjs-start-cli
 
+## 0.1.3
+
+### Patch Changes
+
+- 674405f: Use default appPath as my-next-app
+
 ## 0.1.2
 
 ### Patch Changes
